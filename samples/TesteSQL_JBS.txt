@@ -1,0 +1,46 @@
+
+--1º Clientes que nunca compraram produtos.
+
+SELECT * FROM CUSTOMERS A
+WHERE NOT EXISTS	(
+						SELECT 1 FROM ORDERS B
+						WHERE A.CUSTOMER_ID = B.CUSTOMER_ID
+					)
+					
+--2º Produtos que nunca foram comprados.
+
+SELECT * FROM PRODUCTS A
+WHERE NOT EXISTS	(
+						SELECT 1 FROM ORDERS B
+						WHERE A.PRODUCT_ID = B.PRODUCT_ID
+					)
+					
+--3º Produtos que não possuem Estoque.
+
+SELECT * FROM PRODUCTS A
+WHERE NOT EXISTS	(
+						SELECT 1 FROM STOCKS B
+						WHERE A.PRODUCT_ID = B.PRODUCT_ID
+					)
+
+--4º Agrupar quantidade de vendas de uma determinada marca por loja
+--OBS acrescentei o COALESCE(SUM(OI.QUANTITY), 0) para substituir os nulos.
+
+SELECT	B.BRAND_NAME AS MARCA,
+		S.STORE_NAME AS LOJA,
+		COALESCE(SUM(OI.QUANTITY), 0) AS TOT_VENDAS
+FROM BRANDS B
+LEFT JOIN PRODUCTS P ON B.BRAND_ID = P.BRAND_ID
+LEFT JOIN ORDER_ITENS	OI	ON P.PRODUCT_ID = OI.PRODUCT_ID
+LEFT JOIN ORDERS 		O	ON OI.ORDER_ID = O.ORDER_ID
+LEFT JOIN STORES 		S	ON O.STORE_ID = S.STORE_ID
+GROUP BY B.BRAND_NAME, S.STORE_NAME 
+
+
+--5º Funcionários que não estão relacionados a um pedido.
+
+SELECT * FROM STAFFS A
+WHERE NOT EXISTS	(
+						SELECT 1 FROM ORDERS B
+						WHERE A.STAFF_ID = B.STAFF_ID
+					)
